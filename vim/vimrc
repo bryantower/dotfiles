@@ -1,0 +1,143 @@
+version 6.0
+" not sure what the version should have been, exactly, but it complained
+" about not having a version 4.x... so...
+
+" autoindent lines. useful.
+set autoindent
+
+" use spaces rather than tabs (^I)
+"set expandtab
+
+" sets the width for a tab
+set tabstop=4
+set shiftwidth=4
+set cinoptions=>s,e0,n0,f0,{0,}0,^0,:s,=s,ps,t0,+s,(s,)100,*200,g0
+
+" if we're editing a .java, .C, .c, .cc, or .h file, use cindent
+"au BufEnter *.java set cindent
+"au BufEnter *.C    set cindent
+"au BufEnter *.c    set cindent
+"au BufEnter *.cpp  set cindent
+"au BufEnter *.cc   set cindent
+"au BufEnter *.h    set cindent
+"au BufEnter *.pl   set cindent
+"au BufEnter *.cpp.gen set ft=cpp
+"au BufEnter *.h.gen set ft=cpp
+"au BufEnter *.java.gen set ft=java
+"au BufRead * if line("'\"") > 0 && line("'\"") <= line("$") |   exe "normal g`\"" | endif
+
+"set expandtabs for python
+au BufEnter *.py set noet
+au BufEnter *.py set tw=0
+
+set nobackup        "prevents the annoying ~ files in your directory
+set incsearch       "turns on incremental searching
+set hlsearch        "highlights all of the found search terms
+set ff=unix         " sets the file format to unix
+
+"syntax on
+"filetype plugin indent on
+"Turned of text width 1/6/17 to see if I prefer it this way
+"set textwidth=80
+set nowrap
+set showmatch
+set noequalalways
+set cpoptions+=$
+set backspace=indent,eol,start	" more powerful backspacing
+
+set mousemodel=popup_setpos
+"let spell_auto_type="txt,doc"
+if has("gui_running")
+	"set guifont=-B&H-LucidaTypewriter-Medium-R-Normal-Sans-11-80-100-100-M-70-ISO8859-1
+	"set guifont=Courier 10 Pitch 12
+	set guifont="Bitstream Vera Sans Mono 10"
+else
+	set bg=dark
+endif
+
+"This next line allow vim to look at the top three lines of a file for
+"modlines.
+set modelines=3
+
+" This sets the status line and allows you to know the ascii code of a char
+" It is actually just the %b that tells you the ascii code.
+set statusline=%<%f%h%m%r\ %y\ %b\ Ox%B%=\ \ %l,%c%V\ %P
+set laststatus=2
+
+"This allows <CTRL>+X <CTR>+K to search the dictionary file.
+set dictionary=/usr/dict/words
+"This allows me to use the = as delimeter character for filenames
+set isfname-==
+
+" This next line makes the file completion work more like bash file
+" completion.
+set wildmode=longest,list
+
+"command! -n=+ GrepSource  grep <args> `find . -type f -name "*.h" -or -name "*.hpp" -or -name "*.cpp" -or -name "*.c" -or -name "*.java"`
+
+map <S-F4> :cp<CR>
+map <F3> :tn<CR>
+map <S-F3> <C-t>
+
+"Use this to run javac by typing :make
+"set makeprg=javac\ %
+"set errorformat=%A%f:%l:\ %m,%-Z%p^,%-C%.%# 
+
+map <C-J> <C-W>j
+map <C-K> <C-W>k
+map <C-L> <C-W>l
+map <C-H> <C-W>h
+
+"if it starts printing on A4 that should fix it.
+"set printoptions=paper:letter
+
+"if !has("gui_running")
+"	set bg=dark
+"endif
+
+"function! ReadVimTags()
+"         let vt = expand('%:p:h')
+"         let vt = vt . '/vimtags'
+"         execute "silent! so " . vt
+" endfunction
+" autocmd BufReadPost   *.c,*.h,*.cpp,*.cc      silent call ReadVimTags()
+
+
+" ================ Persistent Undo ==================
+" Keep undo history across sessions, by storing in file.
+" Only works all the time.
+if has('persistent_undo') && !isdirectory(expand('~').'/.vim/backups')
+  silent !mkdir ~/.vim/backups > /dev/null 2>&1
+  set undodir=~/.vim/backups
+  set undofile
+endif
+
+
+function! DoPrettyXML()
+  " save the filetype so we can restore it later
+  let l:origft = &ft
+  set ft=
+  " delete the xml header if it exists. This will
+  " permit us to surround the document with fake tags
+  " without creating invalid xml.
+  1s/<?xml .*?>//e
+  " insert fake tags around the entire document.
+  " This will permit us to pretty-format excerpts of
+  " XML that may contain multiple top-level elements.
+  0put ='<PrettyXML>'
+  $put ='</PrettyXML>'
+  silent %!xmllint --format -
+  " xmllint will insert an <?xml?> header. it's easy enough to delete
+  " if you don't want it.
+  " delete the fake tags
+  2d
+  $d
+  " restore the 'normal' indentation, which is one extra level
+  " too deep due to the extra tags we wrapped around the document.
+  silent %<
+  " back to home
+  1
+  " restore the filetype
+  exe "set ft=" . l:origft
+endfunction
+command! PrettyXML call DoPrettyXML()
