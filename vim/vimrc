@@ -112,6 +112,8 @@ if has('persistent_undo') && !isdirectory(expand('~').'/.vim/backups')
   set undofile
 endif
 
+"Used to copy to system clipboard.
+set clipboard=unamed
 
 function! DoPrettyXML()
   " save the filetype so we can restore it later
