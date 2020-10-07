@@ -113,7 +113,7 @@ if has('persistent_undo') && !isdirectory(expand('~').'/.vim/backups')
 endif
 
 "Used to copy to system clipboard.
-set clipboard=unamed
+set clipboard=unnamed
 
 function! DoPrettyXML()
   " save the filetype so we can restore it later
